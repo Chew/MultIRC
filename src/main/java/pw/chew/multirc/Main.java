@@ -5,12 +5,11 @@ import pw.chew.multirc.listeners.ChannelMessageHandler;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class Main {
     public static Client server1, server2;
+    public static Map<String, String> mapping1, mapping2 = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         Properties server1config = new Properties();
@@ -20,6 +19,9 @@ public class Main {
 
         server1 = create(server1config);
         server2 = create(server2config);
+
+        mapping1 = generateMapping(server1config);
+        mapping2 = generateMapping(server2config);
     }
 
     public static Client create(Properties properties) {
@@ -41,5 +43,15 @@ public class Main {
         client.getEventManager().registerEventListener(new ChannelMessageHandler());
 
         return client;
+    }
+
+    public static Map<String, String> generateMapping(Properties properties) {
+        String[] mappings = properties.getProperty("mapping").split(",");
+        Map<String, String> response = new HashMap<>();
+        for(String mapping : mappings) {
+            String[] mappin = mapping.split(":");
+            response.put(mappin[0], mappin[1]);
+        }
+        return response;
     }
 }
