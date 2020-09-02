@@ -1,13 +1,13 @@
 package pw.chew.multirc.listeners;
 
 import net.engio.mbassy.listener.Handler;
+import org.kitteh.irc.client.library.command.UserModeCommand;
+import org.kitteh.irc.client.library.element.mode.ModeStatus;
 import org.kitteh.irc.client.library.event.channel.ChannelCtcpEvent;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.event.client.ClientNegotiationCompleteEvent;
 import org.kitteh.irc.client.library.util.Format;
 import pw.chew.multirc.Main;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class ChannelMessageHandler {
     private static final Format[] COLORS = {
@@ -47,6 +47,20 @@ public class ChannelMessageHandler {
             } else {
                 Main.server1.sendMessage(Main.mapping2.get(event.getChannel().getName()), message);
             }
+        }
+    }
+    
+    @Handler
+    public void onConnect(ClientNegotiationCompleteEvent event) {
+        if(event.getClient() == Main.server1 && Boolean.parseBoolean(Main.server1config.getProperty("botmode"))
+                || (event.getClient() == Main.server2 && Boolean.parseBoolean(Main.server2config.getProperty("botmode")))) {
+            event.getClient().getServerInfo().getUserModes().stream().filter((mode) ->
+                    mode.getChar() == 'B')
+                    .findFirst()
+                    .ifPresent((bruh) ->
+                            new UserModeCommand(event.getClient())
+                                    .add(ModeStatus.Action.ADD, bruh)
+                                    .execute());
         }
     }
 

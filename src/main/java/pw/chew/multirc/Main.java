@@ -1,6 +1,7 @@
 package pw.chew.multirc;
 
 import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.feature.auth.SaslPlain;
 import pw.chew.multirc.listeners.ChannelMessageHandler;
 
 import java.io.FileInputStream;
@@ -10,11 +11,11 @@ import java.util.*;
 public class Main {
     public static Client server1, server2;
     public static Map<String, String> mapping1, mapping2 = new HashMap<>();
+    public static Properties server1config = new Properties();
+    public static Properties server2config = new Properties();
 
     public static void main(String[] args) throws IOException {
-        Properties server1config = new Properties();
         server1config.load(new FileInputStream("server1.properties"));
-        Properties server2config = new Properties();
         server2config.load(new FileInputStream("server2.properties"));
 
         server1 = create(server1config);
@@ -33,7 +34,11 @@ public class Main {
                 .host(properties.getProperty("host"))
                 .port(Integer.parseInt(properties.getProperty("port")), Client.Builder.Server.SecurityType.SECURE)
                 .then()
-                .buildAndConnect();
+                .build();
+
+        if(properties.containsKey("nickservname") && properties.containsKey("nickservpass"))
+            client.getAuthManager().addProtocol(new SaslPlain(client, properties.getProperty("nickservname"), properties.getProperty("nickservpass")));
+        client.connect();
 
         String[] mappings = properties.getProperty("mapping").split(",");
         List<String> channels = new ArrayList<>();
