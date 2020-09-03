@@ -71,6 +71,6 @@ public class ChannelMessageHandler {
         }
         var color = COLORS[Math.abs(index) % COLORS.length];
 
-        return "<" + Format.COLOR_CHAR + color + nick + Format.RESET +">";
+        return "<" + Format.COLOR_CHAR + color + nick.charAt(0) + "\u200D️" + nick.substring(1) + Format.RESET +">";
     }
 }
